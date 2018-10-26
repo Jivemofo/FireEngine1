@@ -38,13 +38,13 @@ int PotVAL_B = 0; //Sets an intial value for potentiometer
 
 //const int servoPin = 5; // the pin number for the servo signal
 
-const int led_Flash_C_Interval = 500; // number of millisecs between blinks
-const int led_Flash_A_Interval = 2500;
-const int led_Flash_B_Interval = 4500;
+const int led_slow_interval = 5000; // number of millisecs between blinks
+const int led_Flash_A_Interval = 200;
+const int led_Flash_B_Interval = 200;
 const int led_fast_interval = 50;
 
 const int blinkDuration = 500; // number of millisecs that Led's are on - all three leds use this
-const int blinkFastDuration = 50;
+const int blinkFastDuration = blinkDuration/4;
 
 const int buttonInterval = 300; // number of millisecs between button readings
 
@@ -85,33 +85,33 @@ Adafruit_NeoPixel strip4 = Adafruit_NeoPixel(TPIXEL4, PIN_D, NEO_GRB + NEO_KHZ80
 //========================================
 
 void setup() {
-    
+
     Serial.begin(9600);
     Serial.println("Fire Engine Sketch Starting");  // so we know what sketch is running
-    
+
     // set the Led pins as output:
     //pinMode(onBoardLedPin, OUTPUT);
     pinMode(PIN_A, OUTPUT);
     pinMode(PIN_B, OUTPUT);
     pinMode(PIN_C, OUTPUT);
     pinMode(PIN_D, OUTPUT);
-    
+
     // set the button pin as input with a pullup resistor to ensure it defaults to HIGH
     pinMode(BUTTONPIN_A, INPUT_PULLUP);
     pinMode(BUTTONPIN_B, INPUT_PULLUP);
-    
+
     //myservo.write(servoPosition); // sets the initial position
     //myservo.attach(servoPin);
-    
+
 }
 
 //========================================
 
 void loop() {
-    
+
     // Notice that none of the action happens in loop() apart from reading millis()
     //   it just calls the functions that have the action code
-    
+
     currentMillis = millis();   // capture the latest value of millis()
     //   this is equivalent to noting the time from a clock
     //   use the same time for all LED flashes to keep them synchronized
@@ -122,29 +122,29 @@ void loop() {
     updateflasher_B_State();
     writetoLeds();
     switchLeds();  //writes to led's, questionable
-    
+
 }
 
 //========================================
 
 void updateled_Headlight_State() {
-    
+
     if (led_Headlight_State == LOW) {
         // if the Led is off, we must wait for the interval to expire before turning it on
-        if (currentMillis - previousHeadlightMillis >= led_Flash_C_Interval) {
+        if (currentMillis - previousHeadlightMillis >= led_slow_interval) {
             // time is up, so change the state to HIGH
             led_Headlight_State = HIGH;
             // and save the time when we made the change
-            previousHeadlightMillis += led_Flash_C_Interval;
+            previousHeadlightMillis += led_slow_interval;
             // NOTE: The previous line could alternatively be
             //              previousHeadlightMillis = currentMillis
             //        which is the style used in the BlinkWithoutDelay example sketch
             //        Adding on the interval is a better way to ensure that succesive periods are identical
-            
+
         }
     }
     else {  // i.e. if led_Headlight_State is HIGH
-        
+
         // if the Led is on, we must wait for the duration to expire before turning it off
         if (currentMillis - previousHeadlightMillis >= blinkDuration) {
             // time is up, so change the state to LOW
@@ -158,7 +158,7 @@ void updateled_Headlight_State() {
 //========================================
 
 void updateflasher_A_State() {
-    
+
     if (flasher_A_State == LOW) {
         if (currentMillis - previousLed_A_Millis >= led_Flash_A_Interval) {
             flasher_A_State = HIGH;
@@ -176,7 +176,7 @@ void updateflasher_A_State() {
 //========================================
 
 void updateflasher_B_State() {
-    
+
     if (flasher_B_State == LOW) {
         if (currentMillis - previousLed_B_Millis >= led_Flash_B_Interval) {
             flasher_B_State = HIGH;
@@ -197,7 +197,7 @@ void updateflasher_B_State() {
 //This part needs fixing, should be strip.show for all strips
 void switchLeds() {
     // this is the code that actually switches the LEDs on and off
-    
+
     digitalWrite(onBoardLedPin, led_Headlight_State);
     digitalWrite(led_A_Pin, flasher_A_State);
     digitalWrite(led_B_Pin, flasher_B_State);
@@ -210,9 +210,9 @@ void writetoLeds(){
     //Updates each strip
     //Check LED state for each pixel
     for (int i = 0; i< strip.numPixels()< 7 ;i++) {
-        
+
     }
-    
+
 }
 
 
@@ -223,42 +223,41 @@ void writetoLeds(){
 //Need to read headlight button and flashers button
 
 void readButton() {
-    
+
     // this only reads the button state after the button interval has elapsed
     //  this avoids multiple flashes if the button bounces
     // every time the button is pressed it changes buttonLed_State causing the Led to go on or off
     // Notice that there is no need to synchronize this use of millis() with the flashing Leds
-    
+
     if (millis() - previousButtonMillis >= buttonInterval) {
-        
+
         if (digitalRead(buttonPin) == LOW) {
             buttonLed_State = ! buttonLed_State; // this changes it to LOW if it was HIGH
             //   and to HIGH if it was LOW
             previousButtonMillis += buttonInterval;
         }
     }
-    
+
 }
 
 //======================================
 
 void readPots(){   //Read Both potentiometers and Set Brightness
-    
+
     // this only reads the button state after the button interval has elapsed
     //  this avoids multiple flashes if the button bounces
     // every time the button is pressed it changes buttonLed_State causing the Led to go on or off
     // Notice that there is no need to synchronize this use of millis() with the flashing Leds
-    
+
     if (millis() - previousButtonMillis >= buttonInterval) {
-        
+
         PotVal_A = analogRead PotPIN_A;
         PotVal_A = map(PotVal_A, 0, 1023, 0, 255);
         strip1.setBrightness(PotVal_A);
         PotVal_B = analogRead PotPIN_B;
         PotVal_B = map(PotVal_B, 0, 1023, 0, 255);
         strip2.setBrightness(PotVal_B);
-        
-    }
-    
-}
 
+    }
+
+}
