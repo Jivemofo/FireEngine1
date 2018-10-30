@@ -13,11 +13,78 @@ int greenLedMin = minBrightness;
 int blueLedMax = maxBrightness;
 int blueLedMin = minBrightness;
 int potVal1 = 255;  // placeholder value until pot function works
+int CurrentFlashCount = 0;
+
+//Headlights - non flashing
+
+int ledHeadlight_Right = 0;  // Location of LED in strip1
+int ledHeadlight_Left = 3; // Location of LED in strip1
+
+
+
+/* Painful way of writing out each LED, I used a few array's instead. Leaving this in as a reference now
 
 //Headlights
 
-int ledHeadlight_Right = 0;  // Location of LED in strip1
-int ledHeadlight_Left = 2; // Location of LED in strip1
+//Headlight Flashers - White
+int ledHeadlightFlashW_Right = 1; //Location of LED in strip1
+int ledHeadlightFlashW_Left = 2;  //Location of LED in Strip1
+
+//Headlight Flashers - Red
+int ledHeadlightFlashR_Right = 4; //Location of LED in strip1
+int ledHeadlightFlashR_Left = 5: //Location of LED in strip1
+
+//Light Bar Flashers locations- Left - strip 2
+
+int ledLightbarFlashLeftYellow0 = 0;  //Treat as one Yellow Flasher
+int ledLightbarFlashLeftYellow1 = 1;
+int ledLightbarFlashLeftYellow2 = 2;
+
+int ledLightbarFlashLeftRed3 = 3;  // Treat as one Red Flasher
+int ledLightbarFlashLeftRed4 = 4;
+
+int ledLightbarFlashLeftRed5 = 5; //Treat as one Red pulsing, always on
+int ledLightbarFlashLeftRed6 = 6;
+
+int ledLightbarFlashLeftRed7 = 7;  //treat as one Red Flasher
+int ledLightbarFlashLeftRed8 = 8;
+
+
+int ledLightbarFlashLeftRed9 = 9; //treat as one Red Flasher
+int ledLightbarFlashLeftRed10 = 10;
+
+int ledLightbarFlashLeftRed11 = 11; //treat as one Red Flasher
+int ledLightbarFlashLeftRed12 = 12;
+
+
+
+int ledLightbarMiddleYellow = 13; // Always on Running light
+
+
+//light bar flashers locations - Right - strip 2
+
+
+
+int ledLightbarFlashRightRed14 = 14;  //treat as one Red Flasher
+int ledLightbarFlashRightRed15 = 15;
+
+int ledLightbarFlashRightRed16 = 16;  //treat as one Red Flasher
+int ledLightbarFlashRightRed17 = 17;
+
+int ledLightbarFlashRightRed18 = 18;  //treat as one Red Flasher
+int ledLightbarFlashRightRed19 = 19;
+
+int ledLightbarFlashRightRed20 = 20;  //treat as one Red pulsing, always on
+int ledLightbarFlashRightRed21 = 21;
+
+int ledLightbarFlashRightRed22 = 22;  //treat as one Red Flasher
+int ledLightbarFlashRightRed23 = 23;
+
+int ledLightbarFlashRightYellow24 = 24;  //Treat as one Yellow Flasher
+int ledLightbarFlashRightYellow25 = 25;
+int ledLightbarFlashRightYellow26 = 26;
+
+*/
 
 
 
@@ -38,6 +105,7 @@ unsigned long previousButtonMillis = 0; // time when button press last checked
 
 
 
+
 //-------------------Constants
 
 const int led_Flash_C_Interval = 500; // number of millisecs between blinks
@@ -49,6 +117,7 @@ const int blinkDuration = 500; // number of millisecs that Led's are on - all th
 const int blinkFastDuration = 50;
 
 const int buttonInterval = 50; // number of millisecs between button readings
+const int Tpixel1 = 10;
 
 
 void setup() {
@@ -57,8 +126,16 @@ void setup() {
   Serial.println("Fire Engine Begins");
   pinMode(ledPin, OUTPUT);
   pinMode(switch1, INPUT_PULLUP);
-  strip1.begin();
-  strip1.show();
+
+  //create some arrays for the light bar
+ int arrayLightbarPINS[Tpixel1]; // may be unnecessary as LED 0,1,2,3 will be used in other array's as sizeof().
+ byte arrayLightbarState[Tpixel1]; //high or low depending on button state
+ int arrayLightbarFlashCount[Tpixel1]; // will be used to figure out how many flashes have occured, ideally 4
+ memset (arrayLightbarFlashCount, 0, sizeof arrayLightbarFlashCount); //fill FlashCount Array with intial val 0
+
+
+  strip1.begin(); //intialize led strip
+  strip1.show(); //write to strip, should be blank
 }
 
 void loop() {
@@ -66,9 +143,12 @@ void loop() {
   currentMillis = millis();  //capture the latest value of millis
   //this is the equivalent to noting the time from a clock
   //use the same time for all LED flashes to keep them synchronized
-
   updateLed_Headlight_State();
-  output_Led_headlights();
+//update Lightbar states
+//update headlight flashers states
+//update tail light flasher states
+
+  output_Led_headlights(); //fix to update all strips, not just headlights or add separate function
 
 }
 
@@ -89,7 +169,7 @@ void loop() {
 
 
 
-  // write to led?
+  // write to led
  void output_Led_headlights() {
   if (switchState1 == HIGH) {
   both_headlights();
